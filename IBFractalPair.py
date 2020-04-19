@@ -19,7 +19,7 @@ class TestStrategy(bt.Strategy):
         ('profit_percent', 10), # input hundreths of one percent 
         ('loss_percent', 10),   # input hundreths of one percent 
         ('tick_size', 0.25),
-        ('dolog', False)
+        ('dolog', True)
     )
 
     def log(self, txt, dt=None, dolog=None, indent=False):
@@ -31,41 +31,21 @@ class TestStrategy(bt.Strategy):
 
     def __init__(self):
         # Keep references
-        self.seconds = self.datas[0]
-        self.minutes = self.datas[1]
+        self.secondsA = self.datas[0]
+        self.minutesA = self.datas[1]
+        self.secondsB = self.datas[2]
+        self.minutesB = self.datas[3]
 
         # To keep track of pending orders and buy price/commission
         self.order = None
         self.pending_entry_order = False
 
-        # Add a Fractal indicator
-        self.fractal = FI.Fractal(
-            self.minutes, period=self.p.fractal_period, dolog=self.p.dolog
+        # Add Fractal Difference indicators
+        self.fractal_diff_a = FI.FractalDiff(
+            self.minutesA, period=self.p.fractal_period, mult=5, plotname='A Diff'
         )
-
-        # Add a Fractal Momentum indicator
-        self.momentum = FI.FractalMomentum(
-            self.minutes, period=self.p.fractal_period, plot=True, subplot=True
-        )
-
-        # Add EMAs on Fractal Momentum indicator lines
-        self.up_momentum_ema_ind = EMA(
-            self.momentum.l.up_momentum, period=self.p.fractal_period, plotname='Up Momentum'
-        )
-        self.up_momentum_ema_ind.plotlines = dict(
-            ema=dict(color='green', fillstyle='full', _name='Up Momentum')
-        )
-    
-        self.down_momentum_ema_ind = EMA(
-            self.momentum.l.down_momentum, period=self.p.fractal_period, plotname='Down Momentum'
-        )
-        self.up_momentum_ema_ind.plotlines = dict(
-            ema=dict(color='red', fillstyle='full', _name='Down Momentum')
-        )
-
-        # Add a CD on the EMA indicators (up - down)
-        self.momentum_cd = FI.FractalMomentumCD(
-            up=self.up_momentum_ema_ind.l.ema, down=self.down_momentum_ema_ind.l.ema, period=self.p.fractal_period
+        self.fractal_diff_b = FI.FractalDiff(
+            self.minutesB, period=self.p.fractal_period, mult=1, plotname='B Diff'
         )
 
     def notify_order(self, order):
@@ -117,8 +97,10 @@ class TestStrategy(bt.Strategy):
 
     def next(self):
         # Log the closing price of the seconds and minutes lines
-        self.log('Minutes Close, %.2f' % self.minutes.close[0], dt=self.minutes.datetime.datetime(0))
-        self.log('Seconds Close, %.2f' % self.seconds.close[0], dt=self.seconds.datetime.datetime(0), indent=True)
+        self.log('Minutes A Close, %.2f' % self.minutesA.close[0], dt=self.minutesA.datetime.datetime(0))
+        self.log('Seconds A Close, %.2f' % self.secondsA.close[0], dt=self.secondsA.datetime.datetime(0), indent=True)
+        self.log('Minutes B Close, %.2f' % self.minutesB.close[0], dt=self.minutesB.datetime.datetime(0))
+        self.log('Seconds B Close, %.2f' % self.secondsB.close[0], dt=self.secondsB.datetime.datetime(0), indent=True)
     
 
         # Check if an order is pending ... if yes, we cannot send a 2nd one
@@ -128,31 +110,18 @@ class TestStrategy(bt.Strategy):
         # Check if we are in the market
         if not self.position:
 
-            # Grab high and low of current second
-            seconds_high = self.seconds.high[0]
-            seconds_low = self.seconds.low[0]
-
             # Buy if broke above up last up fractal
-            if seconds_high > self.fractal.last_fractals['up'] and self.fractal.last_fractals['up'] != 0:
+            if self.fractal_diff_a.l.up_diff[0] - self.fractal_diff_b.l.up_diff[0] > 30:
 
-                # Set main entry price as trigger price plus $0.50
-                entry_price = seconds_high + 0.50
-                profit_taker = entry_price * (1 + self.p.profit_percent / 10000)
-                stop_loss = entry_price * (1 - self.p.loss_percent / 10000)
+                self.log('SELL A & BUY B | Diff: {}'.format(
+                    self.fractal_diff_a.l.up_diff[0] - self.fractal_diff_b.l.up_diff[0]))
 
-                self.log('BUY BRACKET | MAIN: {}  PROFIT TAKER: {}  STOP LOSS: {}'.format(entry_price, profit_taker, stop_loss))
-
-                self.fractal.last_fractals['up'] = 0
-
-                # Keep track of the created order to avoid a 2nd order
-                stopinfo = {'price': stop_loss,
-                            'pricelimit': stop_loss - self.p.tick_size,
-                            'exectype': bt.Order.StopLimit}
-                self.order = self.buy_bracket(price = entry_price, limitprice=profit_taker, stopargs=stopinfo)
+                self.order = self.sell(data=self.secondsA)
+                self.order = self.buy(data=self.secondsB)
                 self.pending_entry_order = True
 
             # Sell if broke below last down fractal
-            elif seconds_low < self.fractal.last_fractals['down'] and self.fractal.last_fractals['down'] != 0:
+            elif self.fractal_diff_b.l.up_diff[0] - self.fractal_diff_a.l.up_diff[0] > 30:
                 
                 entry_price = seconds_high - 0.50
                 profit_taker = entry_price * (1 - self.p.profit_percent / 10000)
@@ -172,28 +141,51 @@ class TestStrategy(bt.Strategy):
 if __name__ == '__main__':
     #Create cerebro        
     cerebro = bt.Cerebro()
-    
+
     #load data from IB into cerebro
-    store = bt.stores.IBStore(host='127.0.0.1', port=7497, _debug=False)
+    store = bt.stores.IBStore(host='127.0.0.1', port=7497, _debug=True)
     
-    data = store.getdata(dataname='ES-202006-GLOBEX-USD',
+    dataA = store.getdata(name='A',
+                         dataname='ES-202006-GLOBEX-USD',
                          #sectype='',
                          #exch='',
                          #curr='',
                          #expiry='',
                          #strike='',
                          #right='',
-                         #historical=True,
+                         historical=True,
                          timeframe=bt.TimeFrame.Seconds,
                          compression=5,
                          fromdate=datetime.datetime(2020, 4, 16, 12),
                          todate=datetime.datetime(2020, 4, 16, 14)
     )
+    dataB = store.getdata(name='B',
+                         dataname='YM-202006-GLOBEX-USD',
+                         #sectype='',
+                         #exch='',
+                         #curr='',
+                         #expiry='',
+                         #strike='',
+                         #right='',
+                         historical=True,
+                         timeframe=bt.TimeFrame.Seconds,
+                         compression=5,
+                         fromdate=datetime.datetime(2020, 4, 16, 12),
+                         todate=datetime.datetime(2020, 4, 16, 14)
+    )
+    # Add A second data
+    cerebro.adddata(dataA)                     
+    # Add A minute data 
+    cerebro.resampledata(dataA, timeframe=bt.TimeFrame.Minutes, compression=3)
 
-    # Add second data
-    cerebro.adddata(data)                     
-    # Add minute data 
-    cerebro.resampledata(data, timeframe=bt.TimeFrame.Minutes, compression=3)
+    cerebro.broker.setcommission(mult=5, name='A')
+
+    # Add B second data
+    cerebro.adddata(dataA)                     
+    # Add B minute data 
+    cerebro.resampledata(dataA, timeframe=bt.TimeFrame.Minutes, compression=3)
+
+    cerebro.broker.setcommission(mult=0.5, name='B')
        
     # Add strategy to cerebro
     cerebro.addstrategy(TestStrategy)
