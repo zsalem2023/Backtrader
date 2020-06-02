@@ -19,7 +19,7 @@ class TestStrategy(bt.Strategy):
         ('profit_percent', 10), # input hundreths of one percent 
         ('loss_percent', 10),   # input hundreths of one percent 
         ('tick_size', 0.25),
-        ('dolog', False)
+        ('dolog', True)
     )
 
     def log(self, txt, dt=None, dolog=None, indent=False):
@@ -174,8 +174,7 @@ if __name__ == '__main__':
     cerebro = bt.Cerebro()
     
     #load data from IB into cerebro
-    store = bt.stores.IBStore(host='127.0.0.1', port=7497, _debug=False)
-    
+    store = bt.stores.IBStore(host='127.0.0.1', port=7496, _debug=True)
     data = store.getdata(dataname='ES-202006-GLOBEX-USD',
                          #sectype='',
                          #exch='',
@@ -183,15 +182,15 @@ if __name__ == '__main__':
                          #expiry='',
                          #strike='',
                          #right='',
-                         #historical=True,
+                         historical=True,
                          timeframe=bt.TimeFrame.Seconds,
-                         compression=5,
-                         fromdate=datetime.datetime(2020, 4, 16, 12),
-                         todate=datetime.datetime(2020, 4, 16, 14)
+                         compression=30,
+                         fromdate=datetime.datetime(2020, 5, 22, 12),
+                         todate=datetime.datetime(2020, 5, 22, 13)
     )
 
     # Add second data
-    cerebro.adddata(data)                     
+    cerebro.adddata(data)              
     # Add minute data 
     cerebro.resampledata(data, timeframe=bt.TimeFrame.Minutes, compression=3)
        
