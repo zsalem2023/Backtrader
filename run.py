@@ -22,12 +22,17 @@ if __name__ == '__main__':
     #                      fromdate=datetime.datetime(2020, 4, 22),
     #                      todate=datetime.datetime(2020, 5, 23)
     # )
-
-    df = pandas.read_csv('data/BID_ASK_SPY_Hourly.csv')
-    df.set_index('DateTime')
-    df['DateTime'] = df['DateTime'].astype(str)
-    data = bt.feeds.PandasData(dataname=df[:])
+    
+    df = pandas.read_csv('C:\\Users\\jprez\\Documents\\Zach code\\Backtrader\\BID_ASK_EURUSD_Hourly.csv', usecols = ['DateTime', 'Open_Bid', 'High_Bid', 'Low_Bid', 'Close_Bid', 'Open_Ask', 'High_Ask', 'Low_Ask', 'Close_Ask'])
+    df.columns = [col_name.lower() for col_name in df.columns]
+    print(df.columns)
+    
     print(df.dtypes)
+    print(df)
+    df['datetime']= pandas.to_datetime(df['datetime'])
+    df.set_index('datetime')
+    print(df) 
+    data = bt.feeds.PandasData(dataname=df,datetime = 0,open = 1 ,high = 2, low = 3, close = 4)
     # Add second data
     cerebro.adddata(data)              
     # Add minute data 
