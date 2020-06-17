@@ -45,6 +45,7 @@ end_date = '20200616 12:00:00 EST'  # yyyyMMdd hh:mm:ss {TMZ}
 duration_value = 1                  # integer
 duration_unit = DURATIONS[3]        # from list
 bar_size = VALID_BAR_SIZES[13]      # from list
+contract, name = contracts.spy()    # from contracts.py
 # end modify parameters
 
 class IBapi(EWrapper, EClient):
@@ -68,8 +69,6 @@ app.connect('127.0.0.1', 4001, 130)
 api_thread = threading.Thread(target=run_loop, daemon=True)
 api_thread.start()
 time.sleep(2) #Sleep interval to allow time for connection to server
-contract, name = contracts.spy()
-
 
 #bids
 app.reqHistoricalData(1, contract, end_date, str(duration_value)+' '+duration_unit, bar_size, 'BIDS', 0, 2, False, [])
