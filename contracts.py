@@ -7,6 +7,13 @@ def spy():
     contract.exchange = 'ISLAND'
     return contract, 'SPY'
 
+# SPX Index
+def spx():
+    contract = Contract()
+    contract.conId = 332931480
+    contract.exchange = 'ISLAND'
+    return contract, 'SPX'
+
 def euro():
     contract = Contract()
     contract.symbol = 'EUR'
