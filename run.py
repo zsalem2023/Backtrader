@@ -23,10 +23,11 @@ if __name__ == '__main__':
     #                      todate=datetime.datetime(2020, 5, 23)
     # )
 
-    df = pandas.read_csv('BID_ASK_SPY_Hourly.csv')
+    df = pandas.read_csv('data/BID_ASK_SPY_Hourly.csv')
     df.set_index('DateTime')
+    df['DateTime'] = df['DateTime'].astype(str)
     data = bt.feeds.PandasData(dataname=df[:])
-
+    print(df.dtypes)
     # Add second data
     cerebro.adddata(data)              
     # Add minute data 
