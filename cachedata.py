@@ -26,13 +26,26 @@ WTS = [
     'YIELD_LAST'
 ]
 
-BAR_SIZES = {
-    'seconds': 'S',
-    'days': 'D',
-    'week': 'W',
-    'month': 'M',
-    'year', 'Y'
-}
+DURATIONS = [
+    'S',
+    'D',
+    'W',
+    'M',
+    'Y'
+]
+
+VALID_BAR_SIZES = [
+    '1 secs', '5 secs', '10 secs', '15 secs', '30 secs',
+    '1 min', '2 mins', '3 mins', '5 mins', '10 mins', '15 mins', '20 mins', '30 mins',
+    '1 hour', '2 hours', '3 hours', '4 hours', '8 hours', '1 day', '1 week', '1 month'
+]
+
+# modify parameters
+end_date = '20200616 12:00:00 EST'  # yyyyMMdd hh:mm:ss {TMZ}
+duration_value = 1                  # integer
+duration_unit = DURATIONS[3]        # from list
+bar_size = VALID_BAR_SIZES[13]      # from list
+# end modify parameters
 
 class IBapi(EWrapper, EClient):
     def __init__(self):
@@ -59,18 +72,19 @@ contract, name = contracts.spy()
 
 
 #bids
-app.reqHistoricalData(1, contract, '', '1 W', '1 hour', WTS[2], 0, 2, False, [])
+app.reqHistoricalData(1, contract, end_date, str(duration_value)+' '+duration_unit, bar_size, 'BIDS', 0, 2, False, [])
 time.sleep(5) 
 df = pandas.DataFrame(app.bid_data, columns=['DateTime',"Open_Bid","High_Bid","Low_Bid", 'Close_Bid'])
 print(df)
-df['DateTime'] = pandas.to_datetime(df['DateTime'],unit='s') 
+df['DateTime'] = pandas.to_datetime(df['DateTime'],unit='s')
 #asks
-app.reqHistoricalData(2, contract, '', '1 W', '1 hour', 'ASK', 0, 2, False, [])
+app.reqHistoricalData(2, contract, end_date, str(duration_value)+' '+duration_unit, bar_size, 'ASK', 0, 2, False, [])
 time.sleep(5)
 df2 = pandas.DataFrame(app.ask_data, columns=['DateTime',"Open_Ask","High_Ask","Low_Ask", 'Close_Ask'])
 print(df2)
-df2['DateTime'] = pandas.to_datetime(df2['DateTime'],unit='s') 
+df2['DateTime'] = pandas.to_datetime(df2['DateTime'],unit='s')
 df3 = df.merge(df2.set_index('DateTime'),on ='DateTime')
 print(df3)
-df3.to_csv('data/BID_ASK_'+name+'_Hourly.csv')
+filename = 'data/BID ASK '+name+' '+bar_size+' bars for '+str(duration_value)+' '+duration_unit+' before '+'end_date'+'.csv'
+df3.to_csv(filename)
 app.disconnect()
