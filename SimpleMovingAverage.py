@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import backtrader as bt
+import pandas
 
 import datetime as datetime
 import logging
@@ -112,42 +113,3 @@ class SMAStrategy(bt.Strategy):
                 
                 self.order = self.sell()
                 self.pending_entry_order = True
-
-if __name__ == '__main__':
-    # Create cerebro        
-    cerebro = bt.Cerebro()
-    
-    # Load data from IB into cerebro
-    store = bt.stores.IBStore(host='127.0.0.1', port=7496, _debug=True)
-    data = store.getdata(dataname='ES-202006-GLOBEX-USD',
-                         #sectype='',
-                         #exch='',
-                         #curr='',
-                         #expiry='',
-                         #strike='',
-                         #right='',
-                         historical=True,
-                         timeframe=bt.TimeFrame.Minutes,
-                         compression=5,
-                         fromdate=datetime.datetime(2020, 4, 22),
-                         todate=datetime.datetime(2020, 5, 23)
-    )
-    
-    # Add second data
-    cerebro.adddata(data)              
-    # Add minute data 
-    cerebro.resampledata(data, timeframe=bt.TimeFrame.Days, compression=1)
-       
-    # Add strategy to cerebro
-    cerebro.addstrategy(SMAStrategy)
-   
-    # Print out the starting conditions
-    print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
-
-    # Run over everything
-    cerebro.run()
-
-    # Print out the final result
-    print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
-
-    cerebro.plot(style='candlestick')

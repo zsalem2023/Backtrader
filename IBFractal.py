@@ -174,7 +174,7 @@ if __name__ == '__main__':
     cerebro = bt.Cerebro()
     
     #load data from IB into cerebro
-    store = bt.stores.IBStore(host='127.0.0.1', port=7496, _debug=True)
+    store = bt.stores.IBStore(host='127.0.0.1', port=7496, _debug=False)
     data = store.getdata(dataname='ES-202006-GLOBEX-USD',
                          #sectype='',
                          #exch='',
