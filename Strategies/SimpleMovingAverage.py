@@ -16,7 +16,7 @@ logging.getLogger('matplotlib').setLevel(logging.ERROR)
 class SMAStrategy(bt.Strategy):
     params = (
         ('small_sma_period', 5),
-        ('medium_sma_period', 20)
+        ('medium_sma_period', 20),
         ('dolog', True)
     )
 

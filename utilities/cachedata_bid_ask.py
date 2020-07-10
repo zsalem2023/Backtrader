@@ -9,22 +9,7 @@ import pandas
 import contracts
 
 # https://interactivebrokers.github.io/tws-api/historical_bars.html
-WTS = [
-    'TRADES',
-    'MIDPOINT',
-    'BID',
-    'ASK',
-    'BID_ASK',
-    'ADJUSTED_LAST',
-    'HISTORICAL_VOLATILITY',
-    'OPTION_IMPLIED_VOLATILITY',
-    'REBATE_RATE',
-    'FEE_RATE',
-    'YIELD_BID',
-    'YIELD_ASK',
-    'YIELD_BID_ASK',
-    'YIELD_LAST'
-]
+WTS = 'bids and asks combined'
 
 DURATIONS = [
     'S',
@@ -84,6 +69,6 @@ print(df2)
 df2['DateTime'] = pandas.to_datetime(df2['DateTime'],unit='s')
 df3 = df.merge(df2.set_index('DateTime'),on ='DateTime')
 print(df3)
-filename = 'data/BID ASK '+name+' '+bar_size+' bars for '+str(duration_value)+' '+duration_unit+' before '+'end_date'+'.csv'
+filename = 'data/BID ASK '+name+' '+bar_size+' bars for '+str(duration_value)+' '+duration_unit+' before '+end_date+'.csv'
 df3.to_csv(filename)
 app.disconnect()
