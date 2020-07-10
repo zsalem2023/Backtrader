@@ -2,6 +2,12 @@ from SimpleMovingAverage import SMAStrategy
 import backtrader as bt
 import pandas
 
+
+
+# modify parameters
+filepath = 'data/BID_ASK_EURUSD_Hourly.csv'
+# end modify parameters
+
 if __name__ == '__main__':
     # Create cerebro        
     cerebro = bt.Cerebro()
@@ -22,8 +28,8 @@ if __name__ == '__main__':
     #                      fromdate=datetime.datetime(2020, 4, 22),
     #                      todate=datetime.datetime(2020, 5, 23)
     # )
-    
-    df = pandas.read_csv('BID_ASK_EURUSD_Hourly.csv', usecols = ['DateTime', 'Open_Bid', 'High_Bid', 'Low_Bid', 'Close_Bid', 'Open_Ask', 'High_Ask', 'Low_Ask', 'Close_Ask'])
+
+    df = pandas.read_csv(filepath, usecols = ['DateTime', 'Open_Bid', 'High_Bid', 'Low_Bid', 'Close_Bid', 'Open_Ask', 'High_Ask', 'Low_Ask', 'Close_Ask'])
     df.columns = [col_name.lower() for col_name in df.columns]
     df['datetime'] = pandas.to_datetime(df['datetime'])
     df.set_index('datetime')
