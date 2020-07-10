@@ -16,8 +16,7 @@ logging.getLogger('matplotlib').setLevel(logging.ERROR)
 class SMAStrategy(bt.Strategy):
     params = (
         ('small_sma_period', 5),
-        ('medium_sma_period', 20),
-        ('large_sma_period', 50),
+        ('medium_sma_period', 20)
         ('dolog', True)
     )
 
@@ -40,7 +39,6 @@ class SMAStrategy(bt.Strategy):
         # Add a SMA indicator
         self.small_sma = SimpleMovingAverage(self.large, period=self.p.small_sma_period)
         self.medium_sma = SimpleMovingAverage(self.large, period=self.p.medium_sma_period)
-        # self.large_sma = SimpleMovingAverage(self.large, period=self.p.large_sma_period)
 
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
