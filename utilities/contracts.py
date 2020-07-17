@@ -25,7 +25,7 @@ def xlk():
     return contract, 'XLK'
 
 #XLY
-def xlk():
+def xly():
     contract = Contract()
     contract.conId = 418043488
     contract.exchange = 'ISLAND'
