@@ -61,7 +61,8 @@ def run_loop():
     app.run()
 
 app = IBapi()
-app.connect('ec2-52-90-35-26.compute-1.amazonaws.com', 4002, 130)
+# app.connect('ec2-52-90-35-26.compute-1.amazonaws.com', 4002, 130)
+app.connect('127.0.0.1', 4002, 130)
 api_thread = threading.Thread(target=run_loop, daemon=True)
 api_thread.start()
 time.sleep(2)
@@ -70,6 +71,6 @@ app.reqHistoricalData(1, contract, end_date, str(duration_value)+' '+duration_un
 time.sleep(5) 
 df = pandas.DataFrame(app.data, columns=['DateTime',"Open","High","Low", 'Close', 'Volume'])
 df['DateTime'] = pandas.to_datetime(df['DateTime'],unit='s')
-filename = 'data/'+name+' '+what_to_show+' | '+bar_size+' bars for '+str(duration_value)+' '+duration_unit+' before '+end_date+'.csv'
-df.to_csv(filename)
+filename = 'data\\'+name+'-'+what_to_show+'-'+bar_size+'-bars-for-'+str(duration_value)+'-'+duration_unit+'-before-'+end_date+'.csv'
+df.to_csv(filename.replace(' ', '-').replace(':', '-').lower())
 app.disconnect()
