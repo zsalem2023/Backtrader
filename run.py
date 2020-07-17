@@ -1,11 +1,11 @@
-from strategies.SimpleMovingAverage import SMAStrategy as SMA
+from Strategies.SimpleMovingAverage import SMAStrategy as SMA
 import backtrader as bt
 import pandas
 
 
 
 # modify parameters
-filepath = 'data/BID_ASK_EURUSD_Hourly.csv'
+filepath = 'data\spy-midpoint-1-hour-bars-for-1-m-before-20200616-12-00-00-est.csv'
 # end modify parameters
 
 if __name__ == '__main__':

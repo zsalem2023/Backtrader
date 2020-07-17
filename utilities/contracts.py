@@ -6,7 +6,7 @@ from ibapi.contract import Contract
 # SPY ETF that tracks the one day return of the S&P 500 index
 def spy():
     contract = Contract()
-    contract.conId = 418041851
+    contract.conId = 756733
     contract.exchange = 'ISLAND'
     return contract, 'SPY'
 

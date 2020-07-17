@@ -41,10 +41,10 @@ VALID_BAR_SIZES = [
 ]
 
 # modify parameters
-end_date = '20200616 12:00:00 EST'  # yyyyMMdd hh:mm:ss {TMZ}
-duration_value = 1                  # integer
-duration_unit = DURATIONS[3]        # from list
-bar_size = VALID_BAR_SIZES[13]      # from list
+end_date = '20200716 12:00:00 EST'  # yyyyMMdd hh:mm:ss {TMZ}
+duration_value = 2                  # integer (duration value = amount of duration_unit)
+duration_unit = DURATIONS[2]        # from  list (duration_unit = amount of data))
+bar_size = VALID_BAR_SIZES[11]      # from list (intervals, bar sizes)
 what_to_show = WTS[1]               # from list
 contract, name = contracts.spy()    # from contracts.py
 # end modify parameters
@@ -74,3 +74,4 @@ df['DateTime'] = pandas.to_datetime(df['DateTime'],unit='s')
 filename = 'data\\'+name+'-'+what_to_show+'-'+bar_size+'-bars-for-'+str(duration_value)+'-'+duration_unit+'-before-'+end_date+'.csv'
 df.to_csv(filename.replace(' ', '-').replace(':', '-').lower())
 app.disconnect()
+
